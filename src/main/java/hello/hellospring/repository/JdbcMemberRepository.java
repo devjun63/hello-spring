@@ -76,7 +76,6 @@ public class JdbcMemberRepository implements MemberRepository{
         }catch (Exception e){
             throw new IllegalStateException(e);
         }finally {
-
             close(conn, pstmt, rs);
         }
     }
@@ -84,9 +83,11 @@ public class JdbcMemberRepository implements MemberRepository{
     @Override
     public Optional<Member> findById(Long id) {
         String sql = "select * from member where id = ?";
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
@@ -102,27 +103,52 @@ public class JdbcMemberRepository implements MemberRepository{
             } else {
                 return Optional.empty();
             }
-
         }catch (Exception e){
             throw new IllegalStateException(e);
-
         }finally {
-
             close(conn, pstmt, rs);
         }
     }
 
     @Override
     public Optional<Member> findByName(String name) {
-        return Optional.empty();
+        String sql = "select * from member where name = ?";
+
+        Connection conn = null;
+        PreparedStatement pstmt= null;
+        ResultSet rs = null;
+
+        try {
+            conn = getConnection();
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name);
+
+            rs = pstmt.executeQuery();
+
+            if(rs.next()){
+                Member member = new Member();
+                member.setId(rs.getLong("id"));
+                member.setName(rs.getString("name"));
+                return Optional.of(member);
+            }
+
+            return Optional.empty();
+        }catch (Exception e){
+            throw new IllegalStateException(e);
+
+        }finally {
+            close(conn, pstmt, rs);
+        }
     }
 
     @Override
     public List<Member> findAll() {
         String sql = "select * from member";
+
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
+
         try {
             conn = getConnection();
             pstmt = conn.prepareStatement(sql);
